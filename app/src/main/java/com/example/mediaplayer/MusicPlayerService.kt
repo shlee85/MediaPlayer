@@ -103,6 +103,18 @@ class MusicPlayerService: Service() {
         }
     }
 
+    fun getCurrentPosition(): Int {
+
+        return mMediaPlayer?.currentPosition ?: 0
+    }
+
+    fun getDuration(): Int {
+        val duration = mMediaPlayer?.duration
+        Log.i(TAG, "duration = $duration")
+
+        return duration ?: 0
+    }
+
     //바인더를 반환하여 서비스 함수를 사용할 수 있게 한다.
     inner class MusicPlayerBinder: Binder() {
         fun getService(): MusicPlayerService {

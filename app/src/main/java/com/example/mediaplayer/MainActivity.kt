@@ -1,5 +1,6 @@
 package com.example.mediaplayer
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -8,7 +9,6 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.view.View
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mediaplayer.databinding.ActivityMainBinding
 
@@ -34,13 +34,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.btnPlay.setOnClickListener(this)
         binding.btnPause.setOnClickListener(this)
-        binding.btnStop.setOnClickListener(this)
+
+        binding.customSeekbar.progress = 0
+
+        setInitTime()
     }
 
     override fun onResume() {
@@ -81,14 +83,25 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun play() {
         mService?.play()
+        binding.btnPlay.visibility = View.INVISIBLE
+        binding.btnPause.visibility = View.VISIBLE
     }
 
     private fun pause() {
+        val position = mService?.getCurrentPosition()
+
+        Log.i(TAG, "position : $position")
         mService?.pause()
+        binding.btnPlay.visibility = View.VISIBLE
+        binding.btnPause.visibility = View.INVISIBLE
     }
 
-    private fun stop() {
-        mService?.stop()
+    private fun setInitTime() {
+        val duration = mService?.getDuration()
+        binding.customSeekbar.max = duration ?: 0
+        binding.durationTime.text = duration?.let {
+            String.format("%02d:%02d", it / 1000 / 60, it / 1000 % 60)
+        }
     }
 
     override fun onClick(v: View?) {
@@ -102,15 +115,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 Log.i(TAG, "pause()")
                 pause()
             }
-
-            binding.btnStop.id -> {
-                Log.i(TAG, "stop()")
-                stop()
-            }
         }
     }
-
-
 
     companion object {
         val TAG = MainActivity::class.java.simpleName

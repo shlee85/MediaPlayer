@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#B2DFF6" /> <!-- Thumb 색상 -->
+    <size android:width="20dp" android:height="20dp" /> <!-- Thumb 크기 -->
+    <corners android:radius="10dp" /> <!-- 둥근 모서리 -->
+</shape>
