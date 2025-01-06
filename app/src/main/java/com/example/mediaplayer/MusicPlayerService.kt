@@ -32,7 +32,7 @@ class MusicPlayerService: Service() {
         startForegroundService()
 
         //파일 등록
-        val afd = resources.openRawResourceFd(R.raw.chocolate) ?: return
+        val afd = resources.openRawResourceFd(R.raw.erick) ?: return
         mMediaPlayer = MediaPlayer().apply {
             setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
             prepare()
@@ -45,6 +45,7 @@ class MusicPlayerService: Service() {
             }
         }
     }
+
     override fun onBind(intent: Intent?): IBinder? {
         Log.i(TAG, "onBind()")
 

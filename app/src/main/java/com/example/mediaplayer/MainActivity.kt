@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
@@ -12,7 +13,9 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mediaplayer.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -21,6 +24,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var binding: ActivityMainBinding
     private var mService:MusicPlayerService ?= null
     private var mJob: Job? = null
+    private var mGetMediaMetadata: GetMediaMetadata? = null
 
     // 서비스와 구성요소 연결 상태 모니터링
     val mServiceConnection = object : ServiceConnection {
@@ -46,6 +50,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.btnPause.setOnClickListener(this)
 
         binding.customSeekbar.progress = 0
+
+        mGetMediaMetadata = GetMediaMetadata(this)
     }
 
     override fun onResume() {
@@ -84,6 +90,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("DefaultLocale")
     private fun play() {
         mService?.play()
@@ -112,6 +119,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 resetSeekBar()
             }
         })
+
+        //재생 정보 (suspend함수를 호출하기 위해 코루틴 빌더를 사용)
+        GlobalScope.launch {
+            val mediaMetadata = mGetMediaMetadata?.retrieveMetadataFromRawResource(R.raw.erick)
+            Log.i(TAG, "title = ${mediaMetadata?.title}")
+            Log.i(TAG, "artist = ${mediaMetadata?.artist}")
+            Log.i(TAG, "album = ${mediaMetadata?.album}")
+            Log.i(TAG, "bitmap = ${mediaMetadata?.albumArt}")
+            runOnUiThread {
+                binding.audioImage.setImageBitmap(mediaMetadata?.albumArt)
+                //binding.audioImage.setImageBitmap(albumArt)
+            }
+        }
     }
 
     private fun pause() {
