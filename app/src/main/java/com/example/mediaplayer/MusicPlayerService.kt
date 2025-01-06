@@ -1,6 +1,5 @@
 package com.example.mediaplayer
 
-import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -16,12 +15,35 @@ import android.widget.Toast
 class MusicPlayerService: Service() {
     private var mMediaPlayer: MediaPlayer? = null
     private var mBinder: MusicPlayerBinder? = MusicPlayerBinder()
+    private var mMediaPlayerListener: OnMediaPlayerListener ?= null
+
+    interface OnMediaPlayerListener {
+        fun onCompletion()
+    }
+
+    fun setOnMediaPlayerListener(listener: OnMediaPlayerListener) {
+        mMediaPlayerListener = listener
+    }
 
     override fun onCreate() {
         super.onCreate()
         Log.i(TAG, "onCreate()")
 
         startForegroundService()
+
+        //파일 등록
+        val afd = resources.openRawResourceFd(R.raw.chocolate) ?: return
+        mMediaPlayer = MediaPlayer().apply {
+            setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+            prepare()
+            isLooping = false   //반복재생 여부
+            setOnCompletionListener {
+                Log.i(TAG, "#######################")
+                Log.i(TAG, "플레이 완료!")
+                mMediaPlayerListener?.onCompletion()
+                Log.i(TAG, "#######################")
+            }
+        }
     }
     override fun onBind(intent: Intent?): IBinder? {
         Log.i(TAG, "onBind()")
@@ -70,18 +92,11 @@ class MusicPlayerService: Service() {
     }
 
     fun play() {
-        if(mMediaPlayer == null) {
-            mMediaPlayer = MediaPlayer.create(this, R.raw.chocolate) //음악 파일의 리소스를 가져와 미디어 플레이어 객체를 할당.
-
+        if(mMediaPlayer!!.isPlaying) {
+            Toast.makeText(this, "이미 음악이 재생 중입니다.", Toast.LENGTH_SHORT).show()
+        } else {
             mMediaPlayer?.setVolume(1.0f, 1.0f) //볼륨 저장
-            mMediaPlayer?.isLooping = true //반복재생 여부
-            mMediaPlayer?.start()           //음악재생
-        } else {    //음악 재생 중인 경우
-            if(mMediaPlayer!!.isPlaying) {
-                Toast.makeText(this, "이미 음악이 재생 중입니다.", Toast.LENGTH_SHORT).show()
-            } else {
-                mMediaPlayer?.start()   //음악 재생
-            }
+            mMediaPlayer?.start()   //음악 재생
         }
     }
 
@@ -104,7 +119,6 @@ class MusicPlayerService: Service() {
     }
 
     fun getCurrentPosition(): Int {
-
         return mMediaPlayer?.currentPosition ?: 0
     }
 

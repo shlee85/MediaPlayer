@@ -11,10 +11,16 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mediaplayer.databinding.ActivityMainBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var binding: ActivityMainBinding
-    var mService:MusicPlayerService ?= null
+    private var mService:MusicPlayerService ?= null
+    private var mJob: Job? = null
 
     // 서비스와 구성요소 연결 상태 모니터링
     val mServiceConnection = object : ServiceConnection {
@@ -31,7 +37,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -41,8 +46,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.btnPause.setOnClickListener(this)
 
         binding.customSeekbar.progress = 0
-
-        setInitTime()
     }
 
     override fun onResume() {
@@ -81,10 +84,34 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    @SuppressLint("DefaultLocale")
     private fun play() {
         mService?.play()
         binding.btnPlay.visibility = View.INVISIBLE
         binding.btnPause.visibility = View.VISIBLE
+
+        val duration = setInitTime()
+        if(duration > 0) {
+            //재생 업데이트에 관한 코루틴 생성
+            mJob = CoroutineScope(Dispatchers.Main).launch {
+                while (mService?.isPlaying() == true) {
+                    val currentPosition = mService?.getCurrentPosition()
+                    binding.customSeekbar.progress = currentPosition ?: 0
+                    binding.currentTime.text = currentPosition?.let {
+                        String.format("%02d:%02d", it / 1000 / 60, it / 1000 % 60)
+                    }
+
+                    delay(1000)
+                }
+            }
+        }
+
+        mService?.setOnMediaPlayerListener(object : MusicPlayerService.OnMediaPlayerListener {
+            override fun onCompletion() {
+                Log.i(TAG, "파일 재생 끝에 도달.")
+                resetSeekBar()
+            }
+        })
     }
 
     private fun pause() {
@@ -96,12 +123,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.btnPause.visibility = View.INVISIBLE
     }
 
-    private fun setInitTime() {
+    @SuppressLint("DefaultLocale")
+    private fun setInitTime() : Int{
         val duration = mService?.getDuration()
-        binding.customSeekbar.max = duration ?: 0
+        binding.customSeekbar.max = duration ?: 0   //SEEK BAR의 총 사이즈 max값을 현재 재생 되는 미디어의 duration값으로 초기화
         binding.durationTime.text = duration?.let {
             String.format("%02d:%02d", it / 1000 / 60, it / 1000 % 60)
         }
+
+        return duration ?: 0
     }
 
     override fun onClick(v: View?) {
@@ -116,6 +146,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 pause()
             }
         }
+    }
+
+    private fun resetSeekBar() {
+        mJob?.cancel()
+        mJob = null
     }
 
     companion object {
