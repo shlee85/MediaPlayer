@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Build.VERSION_CODES.P
@@ -12,6 +13,8 @@ import android.os.IBinder
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mediaplayer.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +24,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var binding: ActivityMainBinding
@@ -29,8 +33,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private var mGetMediaMetadata: GetMediaMetadata? = null
     private lateinit var mAdapter: MusicListAdapter
     private var musicFiles: MutableList<MusicFile> = mutableListOf()
-
     private var mMenuVisible = false
+
+    //private val mMusicFilePath = "/storage/emulated/0/Music/"
+    //private val mMusicFilePath = "/storage/emulated/0/Download"
+    private val mMusicFilePath = "/data/data/com.example.mediaplayer/files" //퍼미션 문제로인하여 해당 앱의 data폴더를 접근 처리 하였음.
 
     // 서비스와 구성요소 연결 상태 모니터링
     val mServiceConnection = object : ServiceConnection {
@@ -61,16 +68,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         binding.customSeekbar.progress = 0
 
+
+
         mGetMediaMetadata = GetMediaMetadata(this)
 
         //recyclerview초기화
         binding.menuRecyclerView.layoutManager = LinearLayoutManager(this)
 
         //테스트용 더미 데이터.
-        musicFiles.add(MusicFile("erick.mp3", "00:03:28"))
-        musicFiles.add(MusicFile("Alone_-_Color_Out.mp3", "00:04:12"))
-        musicFiles.add(MusicFile("chocolate.mp3", "00:03:45"))
-        musicFiles.add(MusicFile("LEEONA_-_LEEONA_-_Do_I.mp3", "00:02:55"))
+        //musicFiles.add(MusicFile("erick.mp3", "00:03:28"))
+
+        if(isFilesCheck()) {
+            Log.i(TAG, "파일 경로가 유효하다")
+
+            //음악 파일 리스트업
+            getMusicFiles()
+        } else Log.i(TAG, "파일 경로가 잘못 되었음")
 
         mAdapter = MusicListAdapter(musicFiles) {
             //선택된 파일 처리
@@ -231,6 +244,37 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private fun resetSeekBar() {
         mJob?.cancel()
         mJob = null
+    }
+
+    private fun isFilesCheck(): Boolean {
+        return File(mMusicFilePath).exists()
+    }
+
+    private fun getMusicFiles()/*: List<MusicFile>*/ {
+        val directory = File(mMusicFilePath)
+        val files2 = directory.listFiles()
+
+        if (files2 != null) {
+            files2.forEach { file ->
+                Log.i(TAG, "File: ${file.name}, isFile: ${file.isFile}, Extension: ${file.extension}")
+            }
+        } else {
+            Log.e(TAG, "No files found in directory")
+        }
+        if (directory.exists() && directory.isDirectory) {
+            val files = directory.listFiles() // 디렉토리 내부 파일 리스트 가져오기
+            if (files != null) {
+                for (file in files) {
+                    if (file.isFile && file.extension.equals("mp3", ignoreCase = true)) {
+                        musicFiles.add(MusicFile(file.name, "00:00")) // 필요한 데이터를 리스트에 추가
+                    }
+                }
+            } else {
+                Log.i(TAG, "디렉토리에 파일이 없습니다.")
+            }
+        } else {
+            Log.i(TAG, "디렉토리가 존재하지 않거나 유효하지 않습니다.")
+        }
     }
 
     companion object {
