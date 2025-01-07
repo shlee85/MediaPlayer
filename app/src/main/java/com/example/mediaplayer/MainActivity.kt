@@ -159,6 +159,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             Log.i(TAG, "album = ${mediaMetadata?.album}")
             Log.i(TAG, "bitmap = ${mediaMetadata?.albumArt}")
             runOnUiThread {
+                binding.musicPlayTitle.text = mediaMetadata?.title
                 binding.audioImage.setImageBitmap(mediaMetadata?.albumArt)
                 //binding.audioImage.setImageBitmap(albumArt)
             }
