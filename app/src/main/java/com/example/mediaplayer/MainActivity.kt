@@ -48,6 +48,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         binding.btnPlay.setOnClickListener(this)
         binding.btnPause.setOnClickListener(this)
+        binding.btnRepeat.setOnClickListener(this)
+        binding.btnSelectRepeat.setOnClickListener(this)
 
         binding.customSeekbar.progress = 0
 
@@ -164,6 +166,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             binding.btnPause.id -> {
                 Log.i(TAG, "pause()")
                 pause()
+            }
+
+            binding.btnRepeat.id -> {
+                Log.i(TAG, "repeat()")
+                binding.btnRepeat.visibility = View.INVISIBLE
+                binding.btnSelectRepeat.visibility = View.VISIBLE
+
+                mService?.repeat(true)
+            }
+
+            binding.btnSelectRepeat.id -> {
+                Log.i(TAG, "selectRepeat()")
+                binding.btnRepeat.visibility = View.VISIBLE
+                binding.btnSelectRepeat.visibility = View.INVISIBLE
+
+                mService?.repeat(false)
             }
         }
     }

@@ -99,6 +99,8 @@ class MusicPlayerService: Service() {
             mMediaPlayer?.setVolume(1.0f, 1.0f) //볼륨 저장
             mMediaPlayer?.start()   //음악 재생
         }
+
+        Log.i(TAG, "repeat = ${mMediaPlayer?.isLooping}")
     }
 
     fun pause() {
@@ -117,6 +119,10 @@ class MusicPlayerService: Service() {
                 mMediaPlayer = null
             }
         }
+    }
+
+    fun repeat(repeat:Boolean) {
+        mMediaPlayer?.isLooping = repeat
     }
 
     fun getCurrentPosition(): Int {
