@@ -6,11 +6,13 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Bitmap
 import android.os.Build
+import android.os.Build.VERSION_CODES.P
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mediaplayer.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -25,6 +27,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private var mService:MusicPlayerService ?= null
     private var mJob: Job? = null
     private var mGetMediaMetadata: GetMediaMetadata? = null
+    private lateinit var mAdapter: MusicListAdapter
+    private var musicFiles: MutableList<MusicFile> = mutableListOf()
+
+    private var mMenuVisible = false
 
     // 서비스와 구성요소 연결 상태 모니터링
     val mServiceConnection = object : ServiceConnection {
@@ -41,6 +47,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -50,10 +57,32 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.btnPause.setOnClickListener(this)
         binding.btnRepeat.setOnClickListener(this)
         binding.btnSelectRepeat.setOnClickListener(this)
+        binding.btnMenu.setOnClickListener(this)
 
         binding.customSeekbar.progress = 0
 
         mGetMediaMetadata = GetMediaMetadata(this)
+
+        //recyclerview초기화
+        binding.menuRecyclerView.layoutManager = LinearLayoutManager(this)
+
+        //테스트용 더미 데이터.
+        musicFiles.add(MusicFile("erick.mp3", "00:03:28"))
+        musicFiles.add(MusicFile("Alone_-_Color_Out.mp3", "00:04:12"))
+        musicFiles.add(MusicFile("chocolate.mp3", "00:03:45"))
+        musicFiles.add(MusicFile("LEEONA_-_LEEONA_-_Do_I.mp3", "00:02:55"))
+
+        mAdapter = MusicListAdapter(musicFiles) {
+            //선택된 파일 처리
+            for(file in musicFiles) {
+                file.isSelected = file == it
+                Log.i(TAG, "선택된 : ${file.title}")
+            }
+
+            mAdapter.notifyDataSetChanged()
+        }
+
+        binding.menuRecyclerView.adapter = mAdapter
     }
 
     override fun onResume() {
@@ -183,6 +212,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                 mService?.repeat(false)
             }
+
+            binding.btnMenu.id -> {
+                Log.i(TAG, "btnMenu")
+
+                if(!mMenuVisible) {
+                    binding.menuRecyclerView.visibility = View.INVISIBLE
+                    mMenuVisible = true
+                } else {
+                    binding.menuRecyclerView.visibility = View.VISIBLE
+                    mMenuVisible = false
+                }
+            }
         }
     }
 
@@ -194,6 +235,4 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     companion object {
         val TAG = MainActivity::class.java.simpleName
     }
-
-
 }

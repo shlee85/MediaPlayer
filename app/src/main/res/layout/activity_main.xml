@@ -58,7 +58,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginStart="16dp"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="28dp"
         android:src="@drawable/ic_play"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -124,6 +124,31 @@
         app:layout_constraintEnd_toStartOf="@id/btn_back"
         app:layout_constraintHorizontal_bias="0.313"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/btn_menu"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="28dp"
+        android:src="@drawable/ic_menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.580"
+        app:layout_constraintStart_toEndOf="@id/btn_forward" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/menu_recyclerView"
+        android:layout_width="@dimen/_150sdp"
+        android:layout_height="@dimen/_200sdp"
+        android:padding="10dp"
+        android:background="@color/menuBackground"
+        android:layout_marginRight="@dimen/_5sdp"
+        android:layout_marginBottom="@dimen/_5sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/custom_seekbar"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
