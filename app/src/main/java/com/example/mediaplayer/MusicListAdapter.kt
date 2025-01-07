@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.mediaplayer.databinding.ItemMusicListBinding
 
 data class MusicFile(
+    val path: String,
     val title: String,
     val duration: String,
     var isSelected: Boolean = false // 선택 여부를 표시

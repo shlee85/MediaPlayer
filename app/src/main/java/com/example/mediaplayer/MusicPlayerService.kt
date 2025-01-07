@@ -32,9 +32,9 @@ class MusicPlayerService: Service() {
         startForegroundService()
 
         //파일 등록
-        val afd = resources.openRawResourceFd(R.raw.erick) ?: return
+        //val afd = resources.openRawResourceFd(R.raw.erick) ?: return
         mMediaPlayer = MediaPlayer().apply {
-            setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+            setDataSource("/data/data/com.example.mediaplayer/files/chocolate.mp3")
             prepare()
             isLooping = false   //반복재생 여부
             setOnCompletionListener {

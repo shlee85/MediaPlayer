@@ -34,6 +34,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var mAdapter: MusicListAdapter
     private var musicFiles: MutableList<MusicFile> = mutableListOf()
     private var mMenuVisible = false
+    private var mCurrentPlayTitle: String? = null
+    private var mCurrentPlayPath: String? = null
 
     //private val mMusicFilePath = "/storage/emulated/0/Music/"
     //private val mMusicFilePath = "/storage/emulated/0/Download"
@@ -68,8 +70,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         binding.customSeekbar.progress = 0
 
-
-
         mGetMediaMetadata = GetMediaMetadata(this)
 
         //recyclerview초기화
@@ -78,12 +78,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         //테스트용 더미 데이터.
         //musicFiles.add(MusicFile("erick.mp3", "00:03:28"))
 
-        if(isFilesCheck()) {
-            Log.i(TAG, "파일 경로가 유효하다")
-
-            //음악 파일 리스트업
-            getMusicFiles()
-        } else Log.i(TAG, "파일 경로가 잘못 되었음")
+        //음악 파일 리스트업
+        getMusicFiles()
 
         mAdapter = MusicListAdapter(musicFiles) {
             //선택된 파일 처리
@@ -137,6 +133,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("DefaultLocale")
     private fun play() {
+        if(mCurrentPlayTitle == null) {
+            mCurrentPlayTitle = musicFiles[0].title
+            mCurrentPlayPath = musicFiles[0].path
+            Log.i(TAG, "mCurrentPlayPath = $mCurrentPlayPath")
+        }
+
         mService?.play()
         binding.btnPlay.visibility = View.INVISIBLE
         binding.btnPause.visibility = View.VISIBLE
@@ -166,11 +168,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         //재생 정보 (suspend함수를 호출하기 위해 코루틴 빌더를 사용)
         GlobalScope.launch {
-            val mediaMetadata = mGetMediaMetadata?.retrieveMetadataFromRawResource(R.raw.erick)
+            val mediaMetadata = mGetMediaMetadata?.retrieveMetadataFromFilePath(mCurrentPlayPath?:"null")
             Log.i(TAG, "title = ${mediaMetadata?.title}")
             Log.i(TAG, "artist = ${mediaMetadata?.artist}")
             Log.i(TAG, "album = ${mediaMetadata?.album}")
             Log.i(TAG, "bitmap = ${mediaMetadata?.albumArt}")
+
             runOnUiThread {
                 binding.musicPlayTitle.text = mediaMetadata?.title
                 binding.audioImage.setImageBitmap(mediaMetadata?.albumArt)
@@ -246,27 +249,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         mJob = null
     }
 
-    private fun isFilesCheck(): Boolean {
-        return File(mMusicFilePath).exists()
-    }
-
     private fun getMusicFiles()/*: List<MusicFile>*/ {
         val directory = File(mMusicFilePath)
-        val files2 = directory.listFiles()
-
-        if (files2 != null) {
-            files2.forEach { file ->
-                Log.i(TAG, "File: ${file.name}, isFile: ${file.isFile}, Extension: ${file.extension}")
-            }
-        } else {
-            Log.e(TAG, "No files found in directory")
-        }
         if (directory.exists() && directory.isDirectory) {
             val files = directory.listFiles() // 디렉토리 내부 파일 리스트 가져오기
             if (files != null) {
                 for (file in files) {
                     if (file.isFile && file.extension.equals("mp3", ignoreCase = true)) {
-                        musicFiles.add(MusicFile(file.name, "00:00")) // 필요한 데이터를 리스트에 추가
+                        musicFiles.add(MusicFile(mMusicFilePath+"/"+file.name, file.name, "00:00")) // 필요한 데이터를 리스트에 추가,file.name, "00:00")) // 필요한 데이터를 리스트에 추가
                     }
                 }
             } else {
