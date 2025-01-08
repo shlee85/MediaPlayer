@@ -92,6 +92,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
 
         binding.menuRecyclerView.adapter = mAdapter
+
+        mAdapter.setOnItemClickListener(object: MusicListAdapter.onItemClickListener {
+            override fun onItemClick(click: MusicFile) {    //재생 목록에서 클릭시 무조건 해당 데이터 재생
+                Log.i(TAG, "onItemClick Callback!![${click.title}, ${click.path}]")
+                mCurrentPlayTitle = click.title
+                mCurrentPlayPath = click.path
+
+                if(mService?.isPlaying() == true) {
+                    Log.i(TAG, "현재 재생 중입니다. 기존 재생을 멈추고 초기화 합니다.")
+                    mService?.stop()
+                    resetSeekBar()
+                }
+
+                play()
+            }
+        })
     }
 
     override fun onResume() {
@@ -139,7 +155,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             Log.i(TAG, "mCurrentPlayPath = $mCurrentPlayPath")
         }
 
-        mService?.play()
+        mService?.play(mCurrentPlayPath!!)
         binding.btnPlay.visibility = View.INVISIBLE
         binding.btnPause.visibility = View.VISIBLE
 

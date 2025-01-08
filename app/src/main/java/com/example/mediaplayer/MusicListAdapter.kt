@@ -23,6 +23,16 @@ class MusicListAdapter(
 
     lateinit var binding: ItemMusicListBinding
 
+    //음악 리스트에서 선택했을 경우의 콜백
+    interface onItemClickListener {
+        fun onItemClick(click: MusicFile)
+    }
+
+    private lateinit var mClickListener: onItemClickListener
+    fun setOnItemClickListener(listener: onItemClickListener) {
+        mClickListener = listener
+    }
+
     inner class MusicFileViewHolder(private val binding: ItemMusicListBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
@@ -36,6 +46,8 @@ class MusicListAdapter(
 
             if(item.isSelected) {
                 binding.fileContainer.setBackgroundResource(R.color.selectedBackground)
+                Log.i(TAG, "selected title = ${item.title}")
+                mClickListener.onItemClick(item)
             } else {
                 binding.fileContainer.setBackgroundResource(android.R.color.transparent)
             }

@@ -34,8 +34,7 @@ class MusicPlayerService: Service() {
         //파일 등록
         //val afd = resources.openRawResourceFd(R.raw.erick) ?: return
         mMediaPlayer = MediaPlayer().apply {
-            setDataSource("/data/data/com.example.mediaplayer/files/chocolate.mp3")
-            prepare()
+            //setDataSource("/data/data/com.example.mediaplayer/files/chocolate.mp3")
             isLooping = false   //반복재생 여부
             setOnCompletionListener {
                 Log.i(TAG, "#######################")
@@ -92,11 +91,14 @@ class MusicPlayerService: Service() {
         return (mMediaPlayer != null && mMediaPlayer?.isPlaying ?: false)
     }
 
-    fun play() {
+    fun play(path: String) {
         if(mMediaPlayer!!.isPlaying) {
-            Toast.makeText(this, "이미 음악이 재생 중입니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "이미 음악이 재생 중 입니다.", Toast.LENGTH_SHORT).show()
         } else {
+            mMediaPlayer?.reset()
             mMediaPlayer?.setVolume(1.0f, 1.0f) //볼륨 저장
+            mMediaPlayer?.setDataSource(path)
+            mMediaPlayer?.prepare()
             mMediaPlayer?.start()   //음악 재생
         }
 
@@ -115,8 +117,8 @@ class MusicPlayerService: Service() {
         mMediaPlayer?.let {
             if(it.isPlaying) {
                 it.stop()   //음악을 중지
-                it.release()    //미디어 플레이어에 할당된 자원을 해제
-                mMediaPlayer = null
+                //it.release()    //미디어 플레이어에 할당된 자원을 해제
+//                mMediaPlayer = null
             }
         }
     }
