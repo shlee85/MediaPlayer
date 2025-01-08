@@ -87,24 +87,24 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
-        android:id="@+id/btn_forward"
+        android:id="@+id/btn_next_play"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="28dp"
-        android:src="@drawable/ic_forward"
+        android:src="@drawable/ic_next_play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.482"
         app:layout_constraintStart_toEndOf="@id/btn_play" />
 
     <ImageView
-        android:id="@+id/btn_back"
+        android:id="@+id/btn_prev_play"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="28dp"
-        android:src="@drawable/ic_back"
+        android:src="@drawable/ic_prev_play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btn_play"
         app:layout_constraintStart_toStartOf="parent" />
@@ -117,7 +117,7 @@
         android:layout_marginBottom="28dp"
         android:src="@drawable/ic_repeat"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btn_back"
+        app:layout_constraintEnd_toStartOf="@id/btn_prev_play"
         app:layout_constraintHorizontal_bias="0.313"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -130,7 +130,7 @@
         android:src="@drawable/ic_select_repeat"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btn_back"
+        app:layout_constraintEnd_toStartOf="@id/btn_prev_play"
         app:layout_constraintHorizontal_bias="0.313"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -144,7 +144,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.580"
-        app:layout_constraintStart_toEndOf="@id/btn_forward" />
+        app:layout_constraintStart_toEndOf="@id/btn_next_play" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/menu_recyclerView"

@@ -87,11 +87,24 @@ class MusicPlayerService: Service() {
     }
 
     fun isPlaying(): Boolean {
-        Log.i(TAG, "isPlaying")
         return (mMediaPlayer != null && mMediaPlayer?.isPlaying ?: false)
     }
 
-    fun play(path: String) {
+    //Main에서 play버튼시 app시작 후 처음 play를 누른건지 일시 정지 후 누른건지에 따른 상황별 처리
+    fun play(path: String? = null) {
+        if(mMediaPlayer!!.isPlaying) {
+            Toast.makeText(this, "이미 음악이 재생 중 입니다.", Toast.LENGTH_SHORT).show()
+        } else {
+            if(path != null) {
+                mMediaPlayer?.setDataSource(path)
+                mMediaPlayer?.setVolume(1.0f, 1.0f) //볼륨 저장
+                mMediaPlayer?.prepare()
+            }
+
+            mMediaPlayer?.start()   //음악 재생
+        }
+    }
+    fun selectedPlay(path: String) {
         if(mMediaPlayer!!.isPlaying) {
             Toast.makeText(this, "이미 음악이 재생 중 입니다.", Toast.LENGTH_SHORT).show()
         } else {
@@ -110,6 +123,40 @@ class MusicPlayerService: Service() {
             if(it.isPlaying) {
                 it.pause()  //음악을 일시 정지
             }
+        }
+    }
+
+    fun nextPlay(path: String) {
+        Log.i(TAG, "nextPlay()")
+
+        //기존 플레이 종료 및 초기화
+        mMediaPlayer?.let {
+            if(it.isPlaying) {
+                it.stop()
+            }
+
+            it.reset()
+            it.setVolume(1.1f, 1.1f)
+            it.setDataSource(path)
+            it.prepare()
+            it.start()
+        }
+    }
+
+    fun prevPlay(path: String) {
+        Log.i(TAG, "prevPlay()")
+
+        //기존 플레이 종료 및 초기화
+        mMediaPlayer?.let {
+            if(it.isPlaying) {
+                it.stop()
+            }
+
+            it.reset()
+            it.setVolume(1.1f, 1.1f)
+            it.setDataSource(path)
+            it.prepare()
+            it.start()
         }
     }
 

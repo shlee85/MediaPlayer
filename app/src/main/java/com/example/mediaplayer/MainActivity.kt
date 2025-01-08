@@ -36,6 +36,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private var mMenuVisible = false
     private var mCurrentPlayTitle: String? = null
     private var mCurrentPlayPath: String? = null
+    private var mIsFirstPlay = true
+    private var mIsShuffle = false
 
     //private val mMusicFilePath = "/storage/emulated/0/Music/"
     //private val mMusicFilePath = "/storage/emulated/0/Download"
@@ -67,6 +69,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.btnRepeat.setOnClickListener(this)
         binding.btnSelectRepeat.setOnClickListener(this)
         binding.btnMenu.setOnClickListener(this)
+        binding.btnNextPlay.setOnClickListener(this)
+        binding.btnPrevPlay.setOnClickListener(this)
 
         binding.customSeekbar.progress = 0
 
@@ -105,7 +109,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     resetSeekBar()
                 }
 
-                play()
+                play(true)
             }
         })
     }
@@ -148,14 +152,25 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("DefaultLocale")
-    private fun play() {
+    private fun play(isSelected: Boolean) {
         if(mCurrentPlayTitle == null) {
             mCurrentPlayTitle = musicFiles[0].title
             mCurrentPlayPath = musicFiles[0].path
             Log.i(TAG, "mCurrentPlayPath = $mCurrentPlayPath")
         }
 
-        mService?.play(mCurrentPlayPath!!)
+        if(isSelected) {
+            mService?.selectedPlay(mCurrentPlayPath!!)
+        } else {
+            //앱 시작 후 play버튼만 눌렀을 경우 뮤릭플레이 리스트에 첫번째 항목을 재생 한다.
+            if(mIsFirstPlay) {
+                mService?.play(musicFiles[0].path)
+                mIsFirstPlay = false
+            } else {
+                mService?.play()
+            }
+        }
+
         binding.btnPlay.visibility = View.INVISIBLE
         binding.btnPause.visibility = View.VISIBLE
 
@@ -207,6 +222,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.btnPause.visibility = View.INVISIBLE
     }
 
+    private fun forward() {
+        Log.i(TAG, "forward []")
+
+        //셔플인가?
+        //(셔플이 아닌 경우) 다음 파일이 존재하는가?
+    }
+
     @SuppressLint("DefaultLocale")
     private fun setInitTime() : Int{
         val duration = mService?.getDuration()
@@ -222,7 +244,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         when(v?.id) {
             binding.btnPlay.id -> {
                 Log.i(TAG, "play()")
-                play()
+                play(false)
             }
 
             binding.btnPause.id -> {
@@ -255,6 +277,56 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 } else {
                     binding.menuRecyclerView.visibility = View.VISIBLE
                     mMenuVisible = false
+                }
+            }
+
+            binding.btnNextPlay.id -> {
+                Log.i(TAG, "btnNextPlay")
+
+                if(mIsShuffle) {
+                    Log.i(TAG, "셔플 모드 입니다.")
+                } else {
+                    Log.i(TAG, "셔플 모드가 아닙니다.")
+                    Log.i(TAG, "현재 재생 정보[${mCurrentPlayTitle}][$mCurrentPlayTitle]")
+                    var idx = 0
+                    for(music in musicFiles) {
+                        if(mCurrentPlayPath == music.path) {
+                            Log.i(TAG, "현재 위치[$idx][${musicFiles.size}][${musicFiles[idx].title}]")
+                            if(idx < musicFiles.size-1) {   //다음 위치에 파일이 있는 경우
+                                mCurrentPlayTitle = musicFiles[idx+1].title
+                                mCurrentPlayPath = musicFiles[idx+1].path
+                                mService?.nextPlay(mCurrentPlayPath!!)
+                                break
+                            }
+                        }
+
+                        idx++
+                    }
+                }
+            }
+
+            binding.btnPrevPlay.id -> {
+                Log.i(TAG, "btnPrevPlay")
+
+                if(mIsShuffle) {
+                    Log.i(TAG, "셔플 모드 입니다.")
+                } else {
+                    Log.i(TAG, "셔플 모드가 아닙니다.")
+                    Log.i(TAG, "현재 재생 정보[${mCurrentPlayTitle}][$mCurrentPlayTitle]")
+                    var idx = 0
+                    for(music in musicFiles) {
+                        if(mCurrentPlayPath == music.path) {
+                            Log.i(TAG, "현재 위치[$idx][${musicFiles.size}][${musicFiles[idx].title}]")
+                            if(idx > 0) {   //이전 위치에 파일이 있는 경우
+                                mCurrentPlayTitle = musicFiles[idx - 1].title
+                                mCurrentPlayPath = musicFiles[idx - 1].path
+                                mService?.prevPlay(mCurrentPlayPath!!)
+                                break
+                            }
+                        }
+
+                        idx++
+                    }
                 }
             }
         }
