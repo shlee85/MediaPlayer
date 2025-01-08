@@ -1,5 +1,6 @@
 package com.example.mediaplayer
 
+import android.graphics.Bitmap
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,7 @@ data class MusicFile(
     val path: String,
     val title: String,
     val duration: String,
+    val bitmap: Bitmap? = null,
     var isSelected: Boolean = false // 선택 여부를 표시
 )
 
@@ -39,6 +41,7 @@ class MusicListAdapter(
         fun bind(item: MusicFile) {
             binding.fileTitle.text = item.title
             binding.fileDuration.text = item.duration
+            binding.fileIcon.setImageBitmap(item.bitmap)
 
             Log.i(TAG, "title = ${item.title}")
             Log.i(TAG, "duration = ${item.duration}")

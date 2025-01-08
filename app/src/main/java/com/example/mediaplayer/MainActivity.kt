@@ -265,6 +265,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         mJob = null
     }
 
+    @SuppressLint("DefaultLocale")
     private fun getMusicFiles()/*: List<MusicFile>*/ {
         val directory = File(mMusicFilePath)
         if (directory.exists() && directory.isDirectory) {
@@ -272,7 +273,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             if (files != null) {
                 for (file in files) {
                     if (file.isFile && file.extension.equals("mp3", ignoreCase = true)) {
-                        musicFiles.add(MusicFile(mMusicFilePath+"/"+file.name, file.name, "00:00")) // 필요한 데이터를 리스트에 추가,file.name, "00:00")) // 필요한 데이터를 리스트에 추가
+                        val mediaMetadata = mGetMediaMetadata?.retrieveMetadataFromFilePath(
+                            mMusicFilePath+"/"+file.name)
+
+                        mediaMetadata?.duration?.let {
+                            MusicFile(mMusicFilePath+"/"+file.name, file.name,
+                                String.format("%02d:%02d", it.toInt() / 1000 / 60, it.toInt() / 1000 % 60),
+                                mediaMetadata.albumArt
+                            )
+                        }?.let {
+                            musicFiles.add(it)
+                        } // 필요한 데이터를 리스트에 추가,file.name, "00:00")) // 필요한 데이터를 리스트에 추가
                     }
                 }
             } else {

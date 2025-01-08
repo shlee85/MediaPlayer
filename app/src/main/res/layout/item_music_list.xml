@@ -12,9 +12,9 @@
     <!-- 아이콘 -->
     <ImageView
         android:id="@+id/fileIcon"
-        android:layout_width="15dp"
-        android:layout_height="15dp"
-        android:layout_marginEnd="8dp"
+        android:layout_width="@dimen/_10sdp"
+        android:layout_height="@dimen/_10sdp"
+        android:background="@color/black"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -27,6 +27,7 @@
         android:text="File Name"
         android:textSize="@dimen/_5ssp"
         android:textColor="@android:color/white"
+        android:layout_marginStart="@dimen/_5sdp"
         app:layout_constraintStart_toEndOf="@+id/fileIcon"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0" />

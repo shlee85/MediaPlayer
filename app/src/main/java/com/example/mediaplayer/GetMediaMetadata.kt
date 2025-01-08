@@ -30,7 +30,7 @@ class GetMediaMetadata(private val context: Context) {
 
                 bitmap?.let {
                     Log.i(TAG, "bitmap = $bitmap")
-                    MediaMetadata(title, artist, album, bitmap)
+                    MediaMetadata(title, artist, album, "00:00", bitmap)
                 }
             }
         } catch (e: Exception) {
@@ -50,6 +50,7 @@ class GetMediaMetadata(private val context: Context) {
             val title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: "Unknown Title"
             val artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: "Unknown Artist"
             val album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) ?: "Unknown Album"
+            val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION) ?: "00:00"
 
             // Retrieve album art
             val albumArt = retriever.embeddedPicture
@@ -59,7 +60,7 @@ class GetMediaMetadata(private val context: Context) {
                 null
             }
 
-            MediaMetadata(title, artist, album, bitmap)
+            MediaMetadata(title, artist, album, duration, bitmap)
         } catch (e: Exception) {
             Log.e(TAG, "Error retrieving metadata: ${e.message}", e)
             null
@@ -72,6 +73,7 @@ class GetMediaMetadata(private val context: Context) {
         val title: String,
         val artist: String,
         val album: String,
+        val duration: String,
         val albumArt: Bitmap?   //앨범 비트맵
     )
 
