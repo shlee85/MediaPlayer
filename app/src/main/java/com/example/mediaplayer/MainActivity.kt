@@ -194,6 +194,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             override fun onCompletion() {
                 Log.i(TAG, "파일 재생 끝에 도달.")
                 resetSeekBar()
+
+                //다음 곡이 있는지 체크. 있는 경우 재생 없는 경우 조건(반복, 또는 1번 재생)에 따라서 첫번째 곡 재생
             }
         })
 
@@ -364,6 +366,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         } else {
             Log.i(TAG, "디렉토리가 존재하지 않거나 유효하지 않습니다.")
         }
+    }
+
+    private fun checkNextMusic() {
+        Log.i(TAG, "checkNextMusic()")
+
     }
 
     companion object {
