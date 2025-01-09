@@ -196,6 +196,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 resetSeekBar()
 
                 //다음 곡이 있는지 체크. 있는 경우 재생 없는 경우 조건(반복, 또는 1번 재생)에 따라서 첫번째 곡 재생
+                val nextPlayPath = getNextPlay()
+                mService?.nextPlay(nextPlayPath)
             }
         })
 
@@ -210,7 +212,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             runOnUiThread {
                 binding.musicPlayTitle.text = mediaMetadata?.title
                 binding.audioImage.setImageBitmap(mediaMetadata?.albumArt)
-                //binding.audioImage.setImageBitmap(albumArt)
             }
         }
     }
@@ -298,6 +299,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                                 mCurrentPlayTitle = musicFiles[idx+1].title
                                 mCurrentPlayPath = musicFiles[idx+1].path
                                 mService?.nextPlay(mCurrentPlayPath!!)
+
+                                runOnUiThread {
+                                    binding.musicPlayTitle.text = mCurrentPlayTitle
+                                    binding.audioImage.setImageBitmap(musicFiles[idx + 1].bitmap)
+                                }
                                 break
                             }
                         }
@@ -323,6 +329,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                                 mCurrentPlayTitle = musicFiles[idx - 1].title
                                 mCurrentPlayPath = musicFiles[idx - 1].path
                                 mService?.prevPlay(mCurrentPlayPath!!)
+
+                                runOnUiThread {
+                                    binding.musicPlayTitle.text = mCurrentPlayTitle
+                                    binding.audioImage.setImageBitmap(musicFiles[idx - 1].bitmap)
+                                }
                                 break
                             }
                         }
@@ -342,6 +353,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     @SuppressLint("DefaultLocale")
     private fun getMusicFiles()/*: List<MusicFile>*/ {
         val directory = File(mMusicFilePath)
+        var idx = 0
         if (directory.exists() && directory.isDirectory) {
             val files = directory.listFiles() // 디렉토리 내부 파일 리스트 가져오기
             if (files != null) {
@@ -357,6 +369,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                             )
                         }?.let {
                             musicFiles.add(it)
+
+                            //싱글톤을 사용해서 전역으로 관리하도록 한다. ( 아직 사용은 미정 )
+                            MusicPlayInfo.setMusicPlayInfo(
+                                it.title,
+                                it.duration,
+                                idx,
+                                it.bitmap,
+                                it.path,
+                                false
+                                )
+                            idx++
                         } // 필요한 데이터를 리스트에 추가,file.name, "00:00")) // 필요한 데이터를 리스트에 추가
                     }
                 }
@@ -368,9 +391,30 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun checkNextMusic() {
+    private fun getNextPlay(): String {
         Log.i(TAG, "checkNextMusic()")
 
+        var idx = 0
+        for(music in musicFiles) {
+            if(mCurrentPlayPath == music.path) {
+                Log.i(TAG, "현재 위치[$idx][${musicFiles.size}][${musicFiles[idx].title}]")
+                if(idx < musicFiles.size-1) {   //다음 위치에 파일이 있는 경우
+                    mCurrentPlayTitle = musicFiles[idx+1].title
+                    mCurrentPlayPath = musicFiles[idx+1].path
+                    mService?.nextPlay(mCurrentPlayPath!!)
+
+                    runOnUiThread {
+                        binding.musicPlayTitle.text = mCurrentPlayTitle
+                        binding.audioImage.setImageBitmap(musicFiles[idx + 1].bitmap)
+                    }
+                    break
+                }
+            }
+
+            idx++
+        }
+
+        return mCurrentPlayPath ?: ""
     }
 
     companion object {
